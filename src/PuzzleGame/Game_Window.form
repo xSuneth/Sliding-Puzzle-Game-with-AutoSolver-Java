@@ -8,6 +8,9 @@
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
     <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
   </SyntheticProperties>
+  <Events>
+    <EventHandler event="windowActivated" listener="java.awt.event.WindowListener" parameters="java.awt.event.WindowEvent" handler="formWindowActivated"/>
+  </Events>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
@@ -31,7 +34,7 @@
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
+                      <Component id="board" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
@@ -43,14 +46,14 @@
           <Group type="102" attributes="0">
               <Component id="jLabel1" min="-2" pref="79" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
+              <Component id="board" min="-2" max="-2" attributes="0"/>
               <EmptySpace pref="247" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Container class="javax.swing.JPanel" name="jPanel1">
+    <Container class="javax.swing.JPanel" name="board">
 
       <Layout>
         <DimensionLayout dim="0">
@@ -58,30 +61,30 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="B9" pref="0" max="32767" attributes="0"/>
-                      <Component id="B5" min="-2" pref="64" max="-2" attributes="0"/>
-                      <Component id="B1" alignment="0" min="-2" pref="64" max="-2" attributes="0"/>
+                      <Component id="B09" pref="0" max="32767" attributes="0"/>
+                      <Component id="B05" min="-2" pref="64" max="-2" attributes="0"/>
+                      <Component id="B01" alignment="0" min="-2" pref="64" max="-2" attributes="0"/>
                       <Component id="B13" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="B2" alignment="0" min="-2" pref="64" max="-2" attributes="0"/>
+                      <Component id="B02" alignment="0" min="-2" pref="64" max="-2" attributes="0"/>
                       <Component id="B14" pref="0" max="32767" attributes="0"/>
                       <Component id="B10" pref="0" max="32767" attributes="0"/>
-                      <Component id="B6" min="-2" pref="64" max="-2" attributes="0"/>
+                      <Component id="B06" min="-2" pref="64" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="B7" min="-2" pref="64" max="-2" attributes="0"/>
-                      <Component id="B3" alignment="0" min="-2" pref="64" max="-2" attributes="0"/>
+                      <Component id="B07" min="-2" pref="64" max="-2" attributes="0"/>
+                      <Component id="B03" alignment="0" min="-2" pref="64" max="-2" attributes="0"/>
                       <Component id="B11" pref="0" max="32767" attributes="0"/>
                       <Component id="B15" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                       <Component id="B16" pref="0" max="32767" attributes="0"/>
-                      <Component id="B8" min="-2" pref="64" max="-2" attributes="0"/>
-                      <Component id="B4" alignment="0" min="-2" pref="64" max="-2" attributes="0"/>
+                      <Component id="B08" min="-2" pref="64" max="-2" attributes="0"/>
+                      <Component id="B04" alignment="0" min="-2" pref="64" max="-2" attributes="0"/>
                       <Component id="B12" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
@@ -96,20 +99,20 @@
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" alignment="0" attributes="0">
-                                  <Component id="B2" min="-2" pref="64" max="-2" attributes="0"/>
+                                  <Component id="B02" min="-2" pref="64" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="B6" min="-2" pref="64" max="-2" attributes="0"/>
+                                  <Component id="B06" min="-2" pref="64" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="B10" min="-2" pref="64" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="B14" min="-2" pref="64" max="-2" attributes="0"/>
                               </Group>
                               <Group type="102" alignment="0" attributes="0">
-                                  <Component id="B1" min="-2" pref="64" max="-2" attributes="0"/>
+                                  <Component id="B01" min="-2" pref="64" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="B5" min="-2" pref="64" max="-2" attributes="0"/>
+                                  <Component id="B05" min="-2" pref="64" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="B9" min="-2" pref="64" max="-2" attributes="0"/>
+                                  <Component id="B09" min="-2" pref="64" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="B13" min="-2" pref="64" max="-2" attributes="0"/>
                               </Group>
@@ -119,18 +122,18 @@
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" attributes="0">
-                                  <Component id="B3" min="-2" pref="64" max="-2" attributes="0"/>
+                                  <Component id="B03" min="-2" pref="64" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="B7" min="-2" pref="64" max="-2" attributes="0"/>
+                                  <Component id="B07" min="-2" pref="64" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="B11" min="-2" pref="64" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="B15" min="-2" pref="64" max="-2" attributes="0"/>
                               </Group>
                               <Group type="102" alignment="0" attributes="0">
-                                  <Component id="B4" min="-2" pref="64" max="-2" attributes="0"/>
+                                  <Component id="B04" min="-2" pref="64" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="B8" min="-2" pref="64" max="-2" attributes="0"/>
+                                  <Component id="B08" min="-2" pref="64" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="B12" min="-2" pref="64" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
@@ -145,47 +148,47 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JButton" name="B1">
+        <Component class="javax.swing.JButton" name="B01">
           <Properties>
             <Property name="text" type="java.lang.String" value="jButton2"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="B2">
+        <Component class="javax.swing.JButton" name="B02">
           <Properties>
             <Property name="text" type="java.lang.String" value="jButton2"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="B3">
+        <Component class="javax.swing.JButton" name="B03">
           <Properties>
             <Property name="text" type="java.lang.String" value="jButton2"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="B4">
+        <Component class="javax.swing.JButton" name="B04">
           <Properties>
             <Property name="text" type="java.lang.String" value="jButton2"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="B5">
+        <Component class="javax.swing.JButton" name="B05">
           <Properties>
             <Property name="text" type="java.lang.String" value="jButton2"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="B6">
+        <Component class="javax.swing.JButton" name="B06">
           <Properties>
             <Property name="text" type="java.lang.String" value="jButton2"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="B7">
+        <Component class="javax.swing.JButton" name="B07">
           <Properties>
             <Property name="text" type="java.lang.String" value="jButton2"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="B8">
+        <Component class="javax.swing.JButton" name="B08">
           <Properties>
             <Property name="text" type="java.lang.String" value="jButton2"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="B9">
+        <Component class="javax.swing.JButton" name="B09">
           <Properties>
             <Property name="text" type="java.lang.String" value="jButton2"/>
           </Properties>
