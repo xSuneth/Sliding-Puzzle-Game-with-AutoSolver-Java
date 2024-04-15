@@ -39,22 +39,22 @@ public class Game_Window extends javax.swing.JFrame {
     private void initComponents() {
 
         board = new javax.swing.JPanel();
-        B01 = new javax.swing.JButton();
-        B02 = new javax.swing.JButton();
-        B03 = new javax.swing.JButton();
-        B04 = new javax.swing.JButton();
-        B05 = new javax.swing.JButton();
-        B06 = new javax.swing.JButton();
-        B07 = new javax.swing.JButton();
-        B08 = new javax.swing.JButton();
-        B09 = new javax.swing.JButton();
-        B10 = new javax.swing.JButton();
-        B11 = new javax.swing.JButton();
-        B12 = new javax.swing.JButton();
-        B13 = new javax.swing.JButton();
-        B14 = new javax.swing.JButton();
-        B15 = new javax.swing.JButton();
-        B16 = new javax.swing.JButton();
+        B01 = new BoardButton(1, 2);
+        B02 = new BoardButton(1, 2);
+        B03 = new BoardButton(1, 2);
+        B04 = new BoardButton(1, 2);
+        B05 = new BoardButton(1, 2);
+        B06 = new BoardButton(1, 2);
+        B07 = new BoardButton(1, 2);
+        B08 = new BoardButton(1, 2);
+        B09 = new BoardButton(1, 2);
+        B10 = new BoardButton(1, 2);
+        B11 = new BoardButton(1, 2);
+        B12 = new BoardButton(1, 2);
+        B13 = new BoardButton(1, 2);
+        B14 = new BoardButton(1, 2);
+        B15 = new BoardButton(1, 2);
+        B16 = new BoardButton(1, 2);
         jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -179,13 +179,10 @@ public class Game_Window extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(33, 33, 33)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 444, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(board, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 278, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(board, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -194,7 +191,7 @@ public class Game_Window extends javax.swing.JFrame {
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(board, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(247, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -326,22 +323,22 @@ public class Game_Window extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton B01;
-    private javax.swing.JButton B02;
-    private javax.swing.JButton B03;
-    private javax.swing.JButton B04;
-    private javax.swing.JButton B05;
-    private javax.swing.JButton B06;
-    private javax.swing.JButton B07;
-    private javax.swing.JButton B08;
-    private javax.swing.JButton B09;
-    private javax.swing.JButton B10;
-    private javax.swing.JButton B11;
-    private javax.swing.JButton B12;
-    private javax.swing.JButton B13;
-    private javax.swing.JButton B14;
-    private javax.swing.JButton B15;
-    private javax.swing.JButton B16;
+    private BoardButton B01;
+    private BoardButton B02;
+    private BoardButton B03;
+    private BoardButton B04;
+    private BoardButton B05;
+    private BoardButton B06;
+    private BoardButton B07;
+    private BoardButton B08;
+    private BoardButton B09;
+    private BoardButton B10;
+    private BoardButton B11;
+    private BoardButton B12;
+    private BoardButton B13;
+    private BoardButton B14;
+    private BoardButton B15;
+    private BoardButton B16;
     private javax.swing.JPanel board;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
