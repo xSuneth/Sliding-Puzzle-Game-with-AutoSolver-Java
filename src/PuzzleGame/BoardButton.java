@@ -14,9 +14,10 @@ public class BoardButton extends JButton{
     public int XPosition;
     public int YPosition;
     
-    public BoardButton(int x,int y){
-        this.XPosition = x;
-        this.YPosition = y;
-    }
+    // public BoardButton(int x,int y){
+    //     this.XPosition = x;
+    //     this.YPosition = y;
+    // }
+    
     
 }
