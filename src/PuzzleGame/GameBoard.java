@@ -16,6 +16,9 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  *
@@ -23,8 +26,10 @@ import javax.swing.JOptionPane;
  */
 public class GameBoard extends javax.swing.JFrame {
 
-    public static final int GRIDSIZE = 2;
+    public static final int GRIDSIZE = 4;
     public static final int NUMBER_OF_BUTTONS = GRIDSIZE*GRIDSIZE;
+    private int currentMoves = 0;
+    private 
 
     
     String [] solutionArray;
@@ -35,6 +40,7 @@ public class GameBoard extends javax.swing.JFrame {
      * Creates new form Game
      */
     public GameBoard() {
+
         initComponents();
 
         // initBoardButtons();
@@ -49,68 +55,106 @@ public class GameBoard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        Game_Name = new javax.swing.JLabel();
+        gamePanel = new javax.swing.JPanel();
+        detailPanel = new javax.swing.JPanel();
+        movesLabel = new javax.swing.JLabel();
+        timeLabel = new javax.swing.JLabel();
         boardPanel = new javax.swing.JPanel();
 
+        this.setBackground(Color.black);
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setBackground(new java.awt.Color(3, 5, 18));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowActivated(java.awt.event.WindowEvent evt) {
                 formWindowActivated(evt);
             }
         });
 
-        boardPanel.setLayout(new java.awt.GridLayout(GRIDSIZE, GRIDSIZE));
-        getContentPane().add(boardPanel, java.awt.BorderLayout.LINE_START);
+        Game_Name.setBackground(new java.awt.Color(0, 0, 51));
+        Game_Name.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        Game_Name.setForeground(new java.awt.Color(0, 153, 0));
+        Game_Name.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        Game_Name.setText("PUZZLE GAME");
+        getContentPane().add(Game_Name, java.awt.BorderLayout.NORTH);
+
+        gamePanel.setLayout(new java.awt.BorderLayout());
+
+        detailPanel.setLayout(new java.awt.BorderLayout());
+
+        movesLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        movesLabel.setText("jLabel1");
+        movesLabel.setDoubleBuffered(true);
+        movesLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        detailPanel.add(movesLabel, java.awt.BorderLayout.WEST);
+
+        timeLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        timeLabel.setText("jLabel1");
+        timeLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        detailPanel.add(timeLabel, java.awt.BorderLayout.EAST);
+
+        gamePanel.add(detailPanel, java.awt.BorderLayout.NORTH);
+
+        boardPanel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        boardPanel.setLayout(new java.awt.GridLayout(4, 4, 2, 2));
+        gamePanel.add(boardPanel, java.awt.BorderLayout.SOUTH);
         initBoardButtons();
+        getContentPane().add(gamePanel, java.awt.BorderLayout.WEST);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
         initializeTheSolutionArray();
+        startTimer();
+
     }//GEN-LAST:event_formWindowActivated
 
     /**
      * @param args the command line arguments
      */
-    // public static void main(String args[]) {
-    //     /* Set the Nimbus look and feel */
-    //     //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-    //     /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-    //      * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-    //      */
-    //     try {
-    //         for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-    //             if ("Nimbus".equals(info.getName())) {
-    //                 javax.swing.UIManager.setLookAndFeel(info.getClassName());
-    //                 break;
-    //             }
-    //         }
-    //     } catch (ClassNotFoundException ex) {
-    //         java.util.logging.Logger.getLogger(GameBoard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-    //     } catch (InstantiationException ex) {
-    //         java.util.logging.Logger.getLogger(GameBoard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-    //     } catch (IllegalAccessException ex) {
-    //         java.util.logging.Logger.getLogger(GameBoard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-    //     } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-    //         java.util.logging.Logger.getLogger(GameBoard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-    //     }
-    //     //</editor-fold>
-    //     //</editor-fold>
-    //     //</editor-fold>
-    //     //</editor-fold>
-    //     //</editor-fold>
-    //     //</editor-fold>
-    //     //</editor-fold>
-    //     //</editor-fold>
 
-    //     /* Create and display the form */
-    //     java.awt.EventQueue.invokeLater(new Runnable() {
-    //         public void run() {
-    //             new GameBoard().setVisible(true);
-    //         }
-    //     });
-    // }
 
+
+
+
+    //initiate Buttons of the game board when starting the game
+    public void initBoardButtons(){
+
+        
+        ActionListener buttonListener = new ActionListener() {
+
+            //Adding clicking event to all the buttons
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                BoardButton clickedButton = (BoardButton) e.getSource();
+                buttonFunction(clickedButton);
+            }
+        };
+
+        for(int j=1; j<=NUMBER_OF_BUTTONS; j++){
+            BoardButton newButton = new BoardButton();
+            newButton.setText(Integer.toString(j));
+            newButton.setPreferredSize(new Dimension(100,100));
+            newButton.setBackground(Color.BLUE);
+            newButton.setFont(new Font("Arial", Font.BOLD, 20));
+            newButton.setForeground(Color.WHITE);
+            //newButton.setBorder(new RoundedBorder(10));
+            newButton.addActionListener(buttonListener);
+            boardButtons.add(newButton);
+            
+        }
+        Collections.shuffle(boardButtons);
+        boardButtons.get(boardButtons.size()-1).setText("");
+        for(BoardButton button : boardButtons){
+            boardPanel.add(button);
+        }
+    }
+
+
+    
+    
     public void buttonFunction(BoardButton button) {
         int buttonIndex = boardButtons.indexOf(button);
     
@@ -184,53 +228,46 @@ public class GameBoard extends javax.swing.JFrame {
         return true; // Puzzle is in correct order
     }
     
-    
 
+    //MARK: The_Timer_Function
+    public void startTimer() {
+        Timer timer = new Timer(1000, new ActionListener() {
+            int seconds = 0;
+            int minutes = 0;
+            int hours = 0;
 
-
-
-
-
-
-
-    public void initBoardButtons(){
-
-        ActionListener buttonListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Get the source of the event, which is the button clicked
-                BoardButton clickedButton = (BoardButton) e.getSource();
-                // Perform the desired action when a button is clicked
-                // For example, you can print the text of the clicked button
-                System.out.println("Button clicked: " + clickedButton.getText());
-                buttonFunction(clickedButton);
+                seconds++;
+                if (seconds == 60) {
+                    seconds = 0;
+                    minutes++;
+                }
+                if (minutes == 60) {
+                    minutes = 0;
+                    hours++;
+                }
+                timeLabel.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
             }
-        };
+        });
 
-        for(int j=1; j<=NUMBER_OF_BUTTONS; j++){
-            BoardButton newButton = new BoardButton();
-            newButton.setText(Integer.toString(j));
-            newButton.setPreferredSize(new Dimension(100,100));
-            newButton.setBackground(Color.BLUE);
-            newButton.setFont(new Font("Arial", Font.BOLD, 20));
-            newButton.setForeground(Color.WHITE);
-            newButton.addActionListener(buttonListener);
-            boardButtons.add(newButton);
-            
-        }
-       // Collections.shuffle(boardButtons);
-
-
-        boardButtons.get(boardButtons.size()-1).setText("");
-
-
-
-        for(BoardButton button : boardButtons){
-            boardPanel.add(button);
-        }
+        timer.start();
     }
 
+
+
+
+
+
+
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel Game_Name;
     private javax.swing.JPanel boardPanel;
+    private javax.swing.JPanel detailPanel;
+    private javax.swing.JPanel gamePanel;
+    private javax.swing.JLabel movesLabel;
+    private javax.swing.JLabel timeLabel;
     // End of variables declaration//GEN-END:variables
 }
