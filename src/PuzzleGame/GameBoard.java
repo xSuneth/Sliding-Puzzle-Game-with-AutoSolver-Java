@@ -19,6 +19,7 @@ import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.EmptyBorder;
 
 /**
  *
@@ -29,7 +30,7 @@ public class GameBoard extends javax.swing.JFrame {
     public static final int GRIDSIZE = 4;
     public static final int NUMBER_OF_BUTTONS = GRIDSIZE*GRIDSIZE;
     private int currentMoves = 0;
-    private 
+    
 
     
     String [] solutionArray;
@@ -42,7 +43,6 @@ public class GameBoard extends javax.swing.JFrame {
     public GameBoard() {
 
         initComponents();
-
         // initBoardButtons();
     }
 
@@ -61,8 +61,13 @@ public class GameBoard extends javax.swing.JFrame {
         movesLabel = new javax.swing.JLabel();
         timeLabel = new javax.swing.JLabel();
         boardPanel = new javax.swing.JPanel();
-
-        this.setBackground(Color.black);
+        optionPanel = new javax.swing.JPanel();
+        challangeFunctionPanel = new javax.swing.JPanel();
+        mainFunctionPanel = new javax.swing.JPanel();
+        solitionbutton = new javax.swing.JButton();
+        exitButton = new javax.swing.JButton();
+        pauseButton = new javax.swing.JButton();
+        resetbutton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(3, 5, 18));
@@ -78,19 +83,20 @@ public class GameBoard extends javax.swing.JFrame {
         Game_Name.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         Game_Name.setText("PUZZLE GAME");
         getContentPane().add(Game_Name, java.awt.BorderLayout.NORTH);
+        initBoardButtons();
 
         gamePanel.setLayout(new java.awt.BorderLayout());
 
         detailPanel.setLayout(new java.awt.BorderLayout());
 
         movesLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        movesLabel.setText("jLabel1");
+        movesLabel.setText("Moves: 0");
         movesLabel.setDoubleBuffered(true);
         movesLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         detailPanel.add(movesLabel, java.awt.BorderLayout.WEST);
 
         timeLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        timeLabel.setText("jLabel1");
+        timeLabel.setText("00:00:00");
         timeLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         detailPanel.add(timeLabel, java.awt.BorderLayout.EAST);
 
@@ -99,8 +105,29 @@ public class GameBoard extends javax.swing.JFrame {
         boardPanel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         boardPanel.setLayout(new java.awt.GridLayout(4, 4, 2, 2));
         gamePanel.add(boardPanel, java.awt.BorderLayout.SOUTH);
-        initBoardButtons();
+
         getContentPane().add(gamePanel, java.awt.BorderLayout.WEST);
+
+        optionPanel.setLayout(new java.awt.GridLayout(0, 1));
+        optionPanel.add(challangeFunctionPanel);
+
+        mainFunctionPanel.setLayout(new java.awt.GridLayout(0, 1));
+
+        solitionbutton.setText("Solution");
+        mainFunctionPanel.add(solitionbutton);
+
+        exitButton.setText("Quit");
+        mainFunctionPanel.add(exitButton);
+
+        pauseButton.setText("Pause");
+        mainFunctionPanel.add(pauseButton);
+
+        resetbutton.setText("Reset");
+        mainFunctionPanel.add(resetbutton);
+
+        optionPanel.add(mainFunctionPanel);
+
+        getContentPane().add(optionPanel, java.awt.BorderLayout.LINE_END);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -108,6 +135,7 @@ public class GameBoard extends javax.swing.JFrame {
     private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
         initializeTheSolutionArray();
         startTimer();
+        
 
     }//GEN-LAST:event_formWindowActivated
 
@@ -122,10 +150,8 @@ public class GameBoard extends javax.swing.JFrame {
     //initiate Buttons of the game board when starting the game
     public void initBoardButtons(){
 
-        
+        //Adding clicking event to all the buttons
         ActionListener buttonListener = new ActionListener() {
-
-            //Adding clicking event to all the buttons
             @Override
             public void actionPerformed(ActionEvent e) {
                 BoardButton clickedButton = (BoardButton) e.getSource();
@@ -137,14 +163,17 @@ public class GameBoard extends javax.swing.JFrame {
             BoardButton newButton = new BoardButton();
             newButton.setText(Integer.toString(j));
             newButton.setPreferredSize(new Dimension(100,100));
-            newButton.setBackground(Color.BLUE);
+            newButton.setBackground(new Color(20,25,46));
             newButton.setFont(new Font("Arial", Font.BOLD, 20));
             newButton.setForeground(Color.WHITE);
+            newButton.setBorder(null);
+
             //newButton.setBorder(new RoundedBorder(10));
             newButton.addActionListener(buttonListener);
             boardButtons.add(newButton);
             
         }
+
         Collections.shuffle(boardButtons);
         boardButtons.get(boardButtons.size()-1).setText("");
         for(BoardButton button : boardButtons){
@@ -152,7 +181,15 @@ public class GameBoard extends javax.swing.JFrame {
         }
     }
 
+    public void setEmpty(){
 
+    }
+    
+    
+    public void setMoveVount(){
+        currentMoves++;
+        movesLabel.setText("Moves: "+currentMoves);
+    }
     
     
     public void buttonFunction(BoardButton button) {
@@ -181,7 +218,7 @@ public class GameBoard extends javax.swing.JFrame {
         BoardButton button2 = boardButtons.get(index2);
         button2.setText(button1.getText());
         button1.setText("");
-
+        setMoveVount();
         isPuzzleSolved();
     }
 
@@ -265,9 +302,16 @@ public class GameBoard extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel Game_Name;
     private javax.swing.JPanel boardPanel;
+    public javax.swing.JPanel challangeFunctionPanel;
     private javax.swing.JPanel detailPanel;
+    private javax.swing.JButton exitButton;
     private javax.swing.JPanel gamePanel;
+    private javax.swing.JPanel mainFunctionPanel;
     private javax.swing.JLabel movesLabel;
+    private javax.swing.JPanel optionPanel;
+    private javax.swing.JButton pauseButton;
+    private javax.swing.JButton resetbutton;
+    private javax.swing.JButton solitionbutton;
     private javax.swing.JLabel timeLabel;
     // End of variables declaration//GEN-END:variables
 }
