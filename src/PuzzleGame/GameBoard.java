@@ -10,12 +10,22 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -29,20 +39,29 @@ public class GameBoard extends javax.swing.JFrame {
 
     public static final int GRIDSIZE = 4;
     public static final int NUMBER_OF_BUTTONS = GRIDSIZE*GRIDSIZE;
-    private int currentMoves = 0;
+    protected int currentMoves = 0;
+    private String [] solutionArray;
+    private List <BoardButton> boardButtons = new ArrayList<>();
+    protected Boolean isPaused = false;
+    protected Boolean isMute = false;
+    protected ScheduledExecutorService executor;
+    protected JFrame parentWindow;
     
+    ImageIcon muteIcon;
+    ImageIcon unmuteIcon;
 
-    
-    String [] solutionArray;
-
-    List <BoardButton> boardButtons = new ArrayList<>();
+    Clip slideSoundClip;
 
     /**
      * Creates new form Game
      */
-    public GameBoard() {
+    public GameBoard(JFrame parentWindow) {
+        this.muteIcon = new ImageIcon(getClass().getResource("/PuzzleGame/resources/mute.png"));
+        this.unmuteIcon = new ImageIcon(getClass().getResource("/PuzzleGame/resources/unmute.png"));
+        this.parentWindow = parentWindow;
 
         initComponents();
+        loadSoundEffects();
         // initBoardButtons();
     }
 
@@ -56,21 +75,22 @@ public class GameBoard extends javax.swing.JFrame {
     private void initComponents() {
 
         Game_Name = new javax.swing.JLabel();
-        gamePanel = new javax.swing.JPanel();
         detailPanel = new javax.swing.JPanel();
         movesLabel = new javax.swing.JLabel();
         timeLabel = new javax.swing.JLabel();
+        gamePanel = new javax.swing.JPanel();
         boardPanel = new javax.swing.JPanel();
-        optionPanel = new javax.swing.JPanel();
-        challangeFunctionPanel = new javax.swing.JPanel();
         mainFunctionPanel = new javax.swing.JPanel();
+        pauseButton = new javax.swing.JButton();
+        soundButton = new javax.swing.JButton();
+        resetbutton = new javax.swing.JButton();
         solitionbutton = new javax.swing.JButton();
         exitButton = new javax.swing.JButton();
-        pauseButton = new javax.swing.JButton();
-        resetbutton = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setAlwaysOnTop(true);
         setBackground(new java.awt.Color(3, 5, 18));
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowActivated(java.awt.event.WindowEvent evt) {
                 formWindowActivated(evt);
@@ -81,55 +101,159 @@ public class GameBoard extends javax.swing.JFrame {
         Game_Name.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
         Game_Name.setForeground(new java.awt.Color(0, 153, 0));
         Game_Name.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        Game_Name.setText("PUZZLE GAME");
-        getContentPane().add(Game_Name, java.awt.BorderLayout.NORTH);
-        initBoardButtons();
-
-        gamePanel.setLayout(new java.awt.BorderLayout());
+        Game_Name.setText("Slide Puzzle");
 
         detailPanel.setLayout(new java.awt.BorderLayout());
 
+        movesLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         movesLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         movesLabel.setText("Moves: 0");
+        movesLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         movesLabel.setDoubleBuffered(true);
         movesLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        movesLabel.setMaximumSize(new java.awt.Dimension(150, 40));
+        movesLabel.setMinimumSize(new java.awt.Dimension(80, 40));
+        movesLabel.setOpaque(true);
+        movesLabel.setPreferredSize(new java.awt.Dimension(200, 40));
         detailPanel.add(movesLabel, java.awt.BorderLayout.WEST);
 
+        timeLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         timeLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         timeLabel.setText("00:00:00");
+        timeLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         timeLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        timeLabel.setMaximumSize(new java.awt.Dimension(80, 40));
+        timeLabel.setMinimumSize(new java.awt.Dimension(80, 40));
+        timeLabel.setOpaque(true);
+        timeLabel.setPreferredSize(new java.awt.Dimension(200, 40));
         detailPanel.add(timeLabel, java.awt.BorderLayout.EAST);
 
-        gamePanel.add(detailPanel, java.awt.BorderLayout.NORTH);
+        gamePanel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        gamePanel.setLayout(new java.awt.BorderLayout());
 
         boardPanel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         boardPanel.setLayout(new java.awt.GridLayout(4, 4, 2, 2));
         gamePanel.add(boardPanel, java.awt.BorderLayout.SOUTH);
 
-        getContentPane().add(gamePanel, java.awt.BorderLayout.WEST);
-
-        optionPanel.setLayout(new java.awt.GridLayout(0, 1));
-        optionPanel.add(challangeFunctionPanel);
-
-        mainFunctionPanel.setLayout(new java.awt.GridLayout(0, 1));
-
-        solitionbutton.setText("Solution");
-        mainFunctionPanel.add(solitionbutton);
-
-        exitButton.setText("Quit");
-        mainFunctionPanel.add(exitButton);
-
+        pauseButton.setBackground(new java.awt.Color(102, 51, 255));
+        pauseButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        pauseButton.setForeground(new java.awt.Color(255, 255, 255));
         pauseButton.setText("Pause");
-        mainFunctionPanel.add(pauseButton);
+        pauseButton.setBorder(null);
+        pauseButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pauseButtonActionPerformed(evt);
+            }
+        });
 
+        soundButton.setBackground(new java.awt.Color(102, 51, 255));
+        soundButton.setForeground(new java.awt.Color(255, 255, 255));
+        soundButton.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        soundButton.setPreferredSize(new java.awt.Dimension(30, 23));
+        soundButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                soundButtonActionPerformed(evt);
+            }
+        });
+
+        resetbutton.setBackground(new java.awt.Color(102, 51, 255));
+        resetbutton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        resetbutton.setForeground(new java.awt.Color(255, 255, 255));
         resetbutton.setText("Reset");
-        mainFunctionPanel.add(resetbutton);
+        resetbutton.setBorder(null);
+        resetbutton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetbuttonActionPerformed(evt);
+            }
+        });
 
-        optionPanel.add(mainFunctionPanel);
+        solitionbutton.setBackground(new java.awt.Color(102, 51, 255));
+        solitionbutton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        solitionbutton.setForeground(new java.awt.Color(255, 255, 255));
+        solitionbutton.setText("Solution");
+        solitionbutton.setBorder(null);
+        solitionbutton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                solitionbuttonActionPerformed(evt);
+            }
+        });
 
-        getContentPane().add(optionPanel, java.awt.BorderLayout.LINE_END);
+        exitButton.setBackground(new java.awt.Color(102, 51, 255));
+        exitButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        exitButton.setForeground(new java.awt.Color(255, 255, 255));
+        exitButton.setText("Quit");
+        exitButton.setBorder(null);
+        exitButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout mainFunctionPanelLayout = new javax.swing.GroupLayout(mainFunctionPanel);
+        mainFunctionPanel.setLayout(mainFunctionPanelLayout);
+        mainFunctionPanelLayout.setHorizontalGroup(
+            mainFunctionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(mainFunctionPanelLayout.createSequentialGroup()
+                .addGroup(mainFunctionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(solitionbutton, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
+                    .addComponent(pauseButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(mainFunctionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(mainFunctionPanelLayout.createSequentialGroup()
+                        .addComponent(soundButton, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(resetbutton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(exitButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+        mainFunctionPanelLayout.setVerticalGroup(
+            mainFunctionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(mainFunctionPanelLayout.createSequentialGroup()
+                .addGroup(mainFunctionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pauseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(mainFunctionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(resetbutton, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(soundButton, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(mainFunctionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(solitionbutton, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(exitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(mainFunctionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(gamePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+            .addComponent(Game_Name, javax.swing.GroupLayout.DEFAULT_SIZE, 484, Short.MAX_VALUE)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(detailPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 472, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(Game_Name, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 68, Short.MAX_VALUE)
+                .addComponent(gamePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(mainFunctionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addContainerGap(70, Short.MAX_VALUE)
+                    .addComponent(detailPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(529, Short.MAX_VALUE)))
+        );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
@@ -139,16 +263,97 @@ public class GameBoard extends javax.swing.JFrame {
 
     }//GEN-LAST:event_formWindowActivated
 
+    private void solitionbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_solitionbuttonActionPerformed
+        // TODO add your handling code here:
+        solvePuzzle();
+    }//GEN-LAST:event_solitionbuttonActionPerformed
+
+    private void pauseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pauseButtonActionPerformed
+        isPaused = !isPaused;
+        pauseButton.setText(isPaused ? "Resume" : "Pause");
+   
+    }//GEN-LAST:event_pauseButtonActionPerformed
+
+    private void soundButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_soundButtonActionPerformed
+        isMute = !isMute;
+        if(!isMute){
+            soundButton.setIcon(muteIcon);
+            soundButton.setBackground(new Color(102, 51, 255));
+        }
+        else{
+            soundButton.setIcon(unmuteIcon);
+            soundButton.setBackground(new Color(102, 102, 255));
+        }
+
+    }//GEN-LAST:event_soundButtonActionPerformed
+
+    private void resetbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetbuttonActionPerformed
+        resetTimer();
+
+
+
+
+    }//GEN-LAST:event_resetbuttonActionPerformed
+
+    private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
+        isPaused = true;
+        int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to quit?", "Quit Game",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+        if (choice == JOptionPane.YES_OPTION) {
+            this.dispose();
+            parentWindow.setVisible(true);
+        }
+        else isPaused = false;
+    }//GEN-LAST:event_exitButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
 
+    public void loadSoundEffects(){
+        try{
+            AudioInputStream ais = AudioSystem.getAudioInputStream( new File("src/PuzzleGame/resources/slide.wav").getAbsoluteFile() );
+            slideSoundClip = AudioSystem.getClip();
+            slideSoundClip.open(ais);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void playClickSound() {
+        if (slideSoundClip != null && !isMute) {
+            //new thread for sound playback
+            Thread soundThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    slideSoundClip.setFramePosition(0);
+                    slideSoundClip.start();
+                }
+            });
+            soundThread.start();
+        }
+    }
 
 
+    public void showGameOverDialog(){
+        Object[] options = {"Play Again", "Main Menu"};
+        int choice = JOptionPane.showOptionDialog(this, "You Lose!", "Game Over",
+                JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 
+        if (choice == JOptionPane.YES_OPTION) {
+            resetTimer();
+        } else {
+            this.dispose();
+            parentWindow.setVisible(true);
+        }
+    }
 
     //initiate Buttons of the game board when starting the game
     public void initBoardButtons(){
+        soundButton.setIcon(muteIcon);
+
 
         //Adding clicking event to all the buttons
         ActionListener buttonListener = new ActionListener() {
@@ -161,7 +366,9 @@ public class GameBoard extends javax.swing.JFrame {
 
         for(int j=1; j<=NUMBER_OF_BUTTONS; j++){
             BoardButton newButton = new BoardButton();
-            newButton.setText(Integer.toString(j));
+            
+            newButton.setText((j==NUMBER_OF_BUTTONS)?"":Integer.toString(j));
+            
             newButton.setPreferredSize(new Dimension(100,100));
             newButton.setBackground(new Color(20,25,46));
             newButton.setFont(new Font("Arial", Font.BOLD, 20));
@@ -175,7 +382,6 @@ public class GameBoard extends javax.swing.JFrame {
         }
 
         Collections.shuffle(boardButtons);
-        boardButtons.get(boardButtons.size()-1).setText("");
         for(BoardButton button : boardButtons){
             boardPanel.add(button);
         }
@@ -214,10 +420,12 @@ public class GameBoard extends javax.swing.JFrame {
     }
     
     private void swapButtons(int index1, int index2) {
+        if(isPaused) return;
         BoardButton button1 = boardButtons.get(index1);
         BoardButton button2 = boardButtons.get(index2);
         button2.setText(button1.getText());
         button1.setText("");
+        playClickSound();
         setMoveVount();
         isPuzzleSolved();
     }
@@ -268,28 +476,162 @@ public class GameBoard extends javax.swing.JFrame {
 
     //MARK: The_Timer_Function
     public void startTimer() {
-        Timer timer = new Timer(1000, new ActionListener() {
-            int seconds = 0;
-            int minutes = 0;
-            int hours = 0;
+        final int[] time = {0, 0, 0}; // seconds, minutes, hours
 
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(() -> {
+            if (!isPaused) {
+                timeLabel.setVisible(true);
+                timeLabel.setForeground(Color.BLACK);
+                time[0]++;
+
+                if (time[0] == 60) {
+                    time[0] = 0;
+                    time[1]++;
+                }
+                if (time[1] == 60) {
+                    time[1] = 0;
+                    time[2]++;
+                }
+
+                SwingUtilities.invokeLater(() -> {
+                    timeLabel.setText(String.format("%02d:%02d:%02d", time[2], time[1], time[0]));
+                });
+            }
+            else{
+                timeLabel.setVisible(!timeLabel.isVisible());
+                timeLabel.setForeground(Color.ORANGE);
+            }
+        }, 0, 1, TimeUnit.SECONDS); // Update every second
+    }
+
+
+
+    public void resetTimer() {
+
+        for(BoardButton button : boardButtons){
+            boardPanel.remove(button);
+        }
+        Collections.shuffle(boardButtons);
+        if (executor != null) {
+            executor.shutdownNow(); // Stop the current timer task
+        }
+
+        for(BoardButton button : boardButtons){
+            boardPanel.add(button);
+        }
+
+        isPaused = false;
+        startTimer(); // Start a new timer
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public String[] getSolutionArray() {
+        return solutionArray;
+    }
+
+    //Puzzle Solver
+    private void solvePuzzle() {
+        // Create an instance of PuzzleSolver
+        SlidingPuzzleSolver puzzleSolver  = new SlidingPuzzleSolver();
+    
+        // Create the initial puzzle state from the current board configuration
+        Integer[][] boardConfiguration = new Integer[GRIDSIZE][GRIDSIZE];
+        for (int i = 0; i < GRIDSIZE; i++) {
+            for (int j = 0; j < GRIDSIZE; j++) {
+                String buttonText = boardButtons.get(i * GRIDSIZE + j).getText();
+                boardConfiguration[i][j] = buttonText.equals("") ? 0 : Integer.parseInt(buttonText);
+            }
+        }
+        PuzzleState initialState = new PuzzleState(boardConfiguration, 0,0);
+    
+        // Solve the puzzle
+        List<PuzzleState> solutionSteps = puzzleSolver.solvePuzzle(initialState);
+    
+        // Show the solution steps one by one with a 0.5-second interval
+        Timer timer = new Timer(500, new ActionListener() {
+            int currentIndex = 0;
+    
             @Override
             public void actionPerformed(ActionEvent e) {
-                seconds++;
-                if (seconds == 60) {
-                    seconds = 0;
-                    minutes++;
+                if (currentIndex < solutionSteps.size()) {
+                    PuzzleState nextState = solutionSteps.get(currentIndex);
+                    updateBoard(nextState);
+                    currentIndex++;
+                } else {
+                    ((Timer) e.getSource()).stop(); // Stop the timer when all steps are shown
                 }
-                if (minutes == 60) {
-                    minutes = 0;
-                    hours++;
-                }
-                timeLabel.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
             }
         });
-
         timer.start();
     }
+    
+    // Helper method to update the game board based on a puzzle state
+    private void updateBoard(PuzzleState state) {
+        Integer[][] boardConfiguration = state.getBoard();
+        for (int i = 0; i < GRIDSIZE; i++) {
+            for (int j = 0; j < GRIDSIZE; j++) {
+                int value = boardConfiguration[i][j];
+                String buttonText = value == 0 ? "" : Integer.toString(value);
+                boardButtons.get(i * GRIDSIZE + j).setText(buttonText);
+            }
+        }
+        setMoveVount(); // Update move count
+        isPuzzleSolved(); // Check if puzzle is solved
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
 
 
 
@@ -302,16 +644,15 @@ public class GameBoard extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel Game_Name;
     private javax.swing.JPanel boardPanel;
-    public javax.swing.JPanel challangeFunctionPanel;
     private javax.swing.JPanel detailPanel;
     private javax.swing.JButton exitButton;
     private javax.swing.JPanel gamePanel;
     private javax.swing.JPanel mainFunctionPanel;
-    private javax.swing.JLabel movesLabel;
-    private javax.swing.JPanel optionPanel;
+    protected javax.swing.JLabel movesLabel;
     private javax.swing.JButton pauseButton;
     private javax.swing.JButton resetbutton;
     private javax.swing.JButton solitionbutton;
-    private javax.swing.JLabel timeLabel;
+    private javax.swing.JButton soundButton;
+    protected javax.swing.JLabel timeLabel;
     // End of variables declaration//GEN-END:variables
 }
