@@ -1,5 +1,9 @@
 package PuzzleGame;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+
 import javax.swing.JOptionPane;
 
 /*
@@ -39,8 +43,8 @@ public class MenuWindow extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -48,13 +52,13 @@ public class MenuWindow extends javax.swing.JFrame {
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 48)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(102, 51, 255));
         jLabel1.setText("Slide Puzzle");
 
         jPanel1.setLayout(new java.awt.GridLayout(0, 1, 0, 10));
 
-        jButton1.setBackground(new java.awt.Color(102, 102, 255));
+        jButton1.setBackground(new java.awt.Color(102, 51, 255));
         jButton1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jButton1.setForeground(new java.awt.Color(255, 255, 255));
         jButton1.setText("Quick Game");
@@ -91,6 +95,18 @@ public class MenuWindow extends javax.swing.JFrame {
         });
         jPanel1.add(jButton3);
 
+        jButton5.setBackground(new java.awt.Color(102, 51, 255));
+        jButton5.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jButton5.setForeground(new java.awt.Color(255, 255, 255));
+        jButton5.setText("LeaderBoard");
+        jButton5.setBorder(null);
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButton5);
+
         jButton4.setBackground(new java.awt.Color(102, 51, 255));
         jButton4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jButton4.setForeground(new java.awt.Color(255, 255, 255));
@@ -102,18 +118,6 @@ public class MenuWindow extends javax.swing.JFrame {
             }
         });
         jPanel1.add(jButton4);
-
-        jButton5.setBackground(new java.awt.Color(102, 51, 255));
-        jButton5.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jButton5.setForeground(new java.awt.Color(255, 255, 255));
-        jButton5.setText("About");
-        jButton5.setBorder(null);
-        jButton5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton5ActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jButton5);
 
         jButton6.setBackground(new java.awt.Color(102, 51, 255));
         jButton6.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -132,20 +136,21 @@ public class MenuWindow extends javax.swing.JFrame {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(65, 65, 65)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(70, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addGap(123, 123, 123))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(65, 65, 65)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(56, 56, 56)
+                        .addComponent(jLabel1)))
+                .addContainerGap(73, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(50, 50, 50)
+                .addGap(53, 53, 53)
                 .addComponent(jLabel1)
-                .addGap(33, 33, 33)
+                .addGap(30, 30, 30)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(44, Short.MAX_VALUE))
         );
@@ -171,18 +176,18 @@ public class MenuWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        new GameBoard(this).setVisible(true);
+        new GameBoard(this,playerName).setVisible(true);
         this.setVisible(false);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        new TimeChallengeWindow(this).setVisible(true);
+        new TimeChallengeWindow(this,playerName).setVisible(true);
         this.setVisible(false);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:\
-        new MoveChallengeWindow(this).setVisible(true);
+        new MoveChallengeWindow(this,playerName).setVisible(true);
         this.setVisible(false);
     }//GEN-LAST:event_jButton3ActionPerformed
 
@@ -191,11 +196,11 @@ public class MenuWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        // TODO add your handling code here:
+        new LeaderBoardWindow().setVisible(true);
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-        // TODO add your handling code here:
+        System.exit(0);
     }//GEN-LAST:event_jButton6ActionPerformed
     
  public static void main(String args[]) {
@@ -212,9 +217,6 @@ public class MenuWindow extends javax.swing.JFrame {
         return JOptionPane.showInputDialog(this, "Enter your name:", "Player Name",
                 JOptionPane.PLAIN_MESSAGE);
     }
- 
- 
- private 
  
  
  

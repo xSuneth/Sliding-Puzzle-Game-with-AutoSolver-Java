@@ -18,8 +18,8 @@ import javax.swing.SwingUtilities;
  * @author Suneth Chathuranga
  */
 public class TimeChallengeWindow extends GameBoard{
-    TimeChallengeWindow(JFrame parentWindow) {
-        super(parentWindow); // replace someIntValue with the actual value
+    TimeChallengeWindow(JFrame parentWindow, String playerName) {
+        super(parentWindow, playerName); // replace someIntValue with the actual value
         initStart();
     }
     
@@ -58,6 +58,7 @@ public class TimeChallengeWindow extends GameBoard{
 
                 if (time[2] == 0 && time[1] == 0 && time[0] == 0) {
                     executor.shutdown();
+                    showGameOverDialog();
                 }
             }
             else{

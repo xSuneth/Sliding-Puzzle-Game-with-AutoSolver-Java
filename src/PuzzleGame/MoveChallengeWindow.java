@@ -14,15 +14,15 @@ import javax.swing.JLabel;
  */
 public class MoveChallengeWindow extends GameBoard{
     
-    MoveChallengeWindow(JFrame parentWindow){
-        super(parentWindow); // replace someIntValue with the actual value
+    MoveChallengeWindow(JFrame parentWindow, String playerName) {
+        super(parentWindow, playerName); // replace someIntValue with the actual value
         initStart();
       
     }
     
     public void initStart(){
         movesLabel.setText("Remaining Moves: 50");
-        currentMoves = 50;
+        currentMoves = 250;
         //  challangeFunctionPanel.setVisible(true);
         //  JLabel remainingMovesLabel = new JLabel();
         //  remainingMovesLabel.setText("Remaining Moves: 10");
@@ -33,5 +33,6 @@ public class MoveChallengeWindow extends GameBoard{
     public void setMoveVount(){
         currentMoves--;
         movesLabel.setText("Remaining Moves: "+currentMoves);
+        if (currentMoves==0) showGameOverDialog();
     }
 }

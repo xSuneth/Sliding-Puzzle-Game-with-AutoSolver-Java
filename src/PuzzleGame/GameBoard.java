@@ -7,12 +7,13 @@ package PuzzleGame;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -27,9 +28,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.border.EmptyBorder;
+
 
 /**
  *
@@ -46,20 +45,30 @@ public class GameBoard extends javax.swing.JFrame {
     protected Boolean isMute = false;
     protected ScheduledExecutorService executor;
     protected JFrame parentWindow;
+    protected String playerName;
+    protected PlayerManager playerManager = new PlayerManager();
+
+
+    protected Color pauseColor = new Color(255, 102, 0);
+    protected Color mainColor = new Color(102, 51, 255);
     
     ImageIcon muteIcon;
     ImageIcon unmuteIcon;
+    ImageIcon pauseIcon;
+    ImageIcon resumeIcon;
 
     Clip slideSoundClip;
 
     /**
      * Creates new form Game
      */
-    public GameBoard(JFrame parentWindow) {
+    public GameBoard(JFrame parentWindow, String playerName) {
         this.muteIcon = new ImageIcon(getClass().getResource("/PuzzleGame/resources/mute.png"));
         this.unmuteIcon = new ImageIcon(getClass().getResource("/PuzzleGame/resources/unmute.png"));
+        this.pauseIcon = new ImageIcon(getClass().getResource("/PuzzleGame/resources/pause.png"));
+        this.resumeIcon = new ImageIcon(getClass().getResource("/PuzzleGame/resources/play.png"));
         this.parentWindow = parentWindow;
-
+        this.playerName = playerName;
         initComponents();
         loadSoundEffects();
         // initBoardButtons();
@@ -87,8 +96,7 @@ public class GameBoard extends javax.swing.JFrame {
         solitionbutton = new javax.swing.JButton();
         exitButton = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setAlwaysOnTop(true);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setBackground(new java.awt.Color(3, 5, 18));
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -98,12 +106,13 @@ public class GameBoard extends javax.swing.JFrame {
         });
 
         Game_Name.setBackground(new java.awt.Color(0, 0, 51));
-        Game_Name.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        Game_Name.setForeground(new java.awt.Color(0, 153, 0));
+        Game_Name.setFont(new java.awt.Font("Segoe UI", 1, 42)); // NOI18N
+        Game_Name.setForeground(new java.awt.Color(102, 51, 255));
         Game_Name.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         Game_Name.setText("Slide Puzzle");
 
         detailPanel.setLayout(new java.awt.BorderLayout());
+        initBoardButtons();
 
         movesLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         movesLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -239,8 +248,9 @@ public class GameBoard extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(Game_Name, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 68, Short.MAX_VALUE)
+                .addGap(21, 21, 21)
+                .addComponent(Game_Name, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 60, Short.MAX_VALUE)
                 .addComponent(gamePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(mainFunctionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -266,11 +276,22 @@ public class GameBoard extends javax.swing.JFrame {
     private void solitionbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_solitionbuttonActionPerformed
         // TODO add your handling code here:
         solvePuzzle();
+        //showWinningDialog();
     }//GEN-LAST:event_solitionbuttonActionPerformed
 
     private void pauseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pauseButtonActionPerformed
         isPaused = !isPaused;
-        pauseButton.setText(isPaused ? "Resume" : "Pause");
+        if(isPaused){
+            pauseButton.setText("Resume");
+            pauseButton.setIcon(resumeIcon);
+            pauseButton.setBackground(pauseColor);
+        }
+        else{
+            pauseButton.setText("Pause");
+            pauseButton.setIcon(pauseIcon);
+            pauseButton.setBackground(mainColor);
+        }
+
    
     }//GEN-LAST:event_pauseButtonActionPerformed
 
@@ -296,6 +317,26 @@ public class GameBoard extends javax.swing.JFrame {
     }//GEN-LAST:event_resetbuttonActionPerformed
 
     private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
+        performExit();
+    }//GEN-LAST:event_exitButtonActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+
+
+     protected void processWindowEvent(WindowEvent e) {
+        super.processWindowEvent(e);
+        if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+            performExit(); // Call the terminate method when the window is closing
+        }
+    }
+
+
+
+
+
+     public void performExit(){
         isPaused = true;
         int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to quit?", "Quit Game",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -305,15 +346,18 @@ public class GameBoard extends javax.swing.JFrame {
             parentWindow.setVisible(true);
         }
         else isPaused = false;
-    }//GEN-LAST:event_exitButtonActionPerformed
+     }
 
-    /**
-     * @param args the command line arguments
-     */
+
+
+
+
 
     public void loadSoundEffects(){
         try{
-            AudioInputStream ais = AudioSystem.getAudioInputStream( new File("src/PuzzleGame/resources/slide.wav").getAbsoluteFile() );
+            InputStream inputStream = getClass().getResourceAsStream("/PuzzleGame/resources/slide.wav");
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            AudioInputStream ais = AudioSystem.getAudioInputStream(bufferedInputStream);
             slideSoundClip = AudioSystem.getClip();
             slideSoundClip.open(ais);
         }
@@ -350,6 +394,22 @@ public class GameBoard extends javax.swing.JFrame {
         }
     }
 
+    public void showWinningDialog(){
+        isPaused = true;
+        playerManager.addPlayer(playerName, timeLabel.getText());
+        JOptionPane.showMessageDialog(null,"You Won! Score: "+timeLabel.getText(), "Congratulations!",JOptionPane.OK_CANCEL_OPTION );
+        System.out.println("You Won");
+    }
+
+
+
+
+
+
+
+
+
+
     //initiate Buttons of the game board when starting the game
     public void initBoardButtons(){
         soundButton.setIcon(muteIcon);
@@ -367,10 +427,16 @@ public class GameBoard extends javax.swing.JFrame {
         for(int j=1; j<=NUMBER_OF_BUTTONS; j++){
             BoardButton newButton = new BoardButton();
             
-            newButton.setText((j==NUMBER_OF_BUTTONS)?"":Integer.toString(j));
+            if((j==NUMBER_OF_BUTTONS)){
+                newButton.setText("");
+                setEmptyButtonStyle(newButton);
+            }
+            else{
+                newButton.setText(Integer.toString(j));
+                setDefaultButtonStyle(newButton);
+            }
             
             newButton.setPreferredSize(new Dimension(100,100));
-            newButton.setBackground(new Color(20,25,46));
             newButton.setFont(new Font("Arial", Font.BOLD, 20));
             newButton.setForeground(Color.WHITE);
             newButton.setBorder(null);
@@ -381,14 +447,21 @@ public class GameBoard extends javax.swing.JFrame {
             
         }
 
+        //MARK: Shuffle
         Collections.shuffle(boardButtons);
         for(BoardButton button : boardButtons){
             boardPanel.add(button);
         }
     }
 
-    public void setEmpty(){
+    public void setEmptyButtonStyle(BoardButton boardButton){
+        boardButton.setEnabled(false);
+        boardButton.setBackground(Color.WHITE); 
+    }
 
+    public void setDefaultButtonStyle(BoardButton boardButton){
+        boardButton.setEnabled(true);
+        boardButton.setBackground(new Color(20,25,46));
     }
     
     
@@ -425,6 +498,8 @@ public class GameBoard extends javax.swing.JFrame {
         BoardButton button2 = boardButtons.get(index2);
         button2.setText(button1.getText());
         button1.setText("");
+        setEmptyButtonStyle(button1);
+        setDefaultButtonStyle(button2);
         playClickSound();
         setMoveVount();
         isPuzzleSolved();
@@ -441,7 +516,7 @@ public class GameBoard extends javax.swing.JFrame {
             for(int j=(i*GRIDSIZE)+1; j<((i+1)*GRIDSIZE)+1; j++){ 
                 solutionArray[index] = Integer.toString(j);
                 index++;
-                System.out.println(j);
+                //System.out.println(j);
             }
             
         }
@@ -449,7 +524,7 @@ public class GameBoard extends javax.swing.JFrame {
             for(int j=(i+1)*GRIDSIZE; j>(i*GRIDSIZE); j--){ 
                 solutionArray[index] = Integer.toString(j);
                 index++;
-                System.out.println(j);
+                //System.out.println(j);
         }
 
         solutionArray[(GRIDSIZE%2==0)? NUMBER_OF_BUTTONS-(GRIDSIZE) : NUMBER_OF_BUTTONS-1] = "";
@@ -458,7 +533,7 @@ public class GameBoard extends javax.swing.JFrame {
 
         
     }
-    System.out.println("Solusion Array Generated Succesfull!");
+    //System.out.println("Solusion Array Generated Succesfull!");
     }
 
     public boolean isPuzzleSolved() {
@@ -468,8 +543,7 @@ public class GameBoard extends javax.swing.JFrame {
                 return false; // Puzzle is not in correct order
             }
         }
-        JOptionPane.showMessageDialog(null,"You Won!", "Congratulations!",JOptionPane.OK_CANCEL_OPTION );
-        System.out.println("You Won");
+        showWinningDialog();
         return true; // Puzzle is in correct order
     }
     
@@ -563,17 +637,30 @@ public class GameBoard extends javax.swing.JFrame {
     //Puzzle Solver
     private void solvePuzzle() {
         // Create an instance of PuzzleSolver
+        int emtyRow=0, emptyCol=0;
         SlidingPuzzleSolver puzzleSolver  = new SlidingPuzzleSolver();
     
         // Create the initial puzzle state from the current board configuration
-        Integer[][] boardConfiguration = new Integer[GRIDSIZE][GRIDSIZE];
+        int[][] boardConfiguration = new int[GRIDSIZE][GRIDSIZE];
         for (int i = 0; i < GRIDSIZE; i++) {
             for (int j = 0; j < GRIDSIZE; j++) {
                 String buttonText = boardButtons.get(i * GRIDSIZE + j).getText();
-                boardConfiguration[i][j] = buttonText.equals("") ? 0 : Integer.parseInt(buttonText);
+                boardConfiguration[i][j] = buttonText.equals("") ? 16 : Integer.parseInt(buttonText);
             }
         }
-        PuzzleState initialState = new PuzzleState(boardConfiguration, 0,0);
+
+        for(BoardButton button : boardButtons){
+            if(button.getText().equals("")){
+                int position = boardButtons.indexOf(button);
+                emtyRow = position/GRIDSIZE;
+                emptyCol = position%GRIDSIZE;
+                break;
+        }}
+
+
+
+        PuzzleState initialState = new PuzzleState(boardConfiguration,emtyRow,emptyCol, null);
+        System.out.println(boardConfiguration.toString());
     
         // Solve the puzzle
         List<PuzzleState> solutionSteps = puzzleSolver.solvePuzzle(initialState);
@@ -598,7 +685,7 @@ public class GameBoard extends javax.swing.JFrame {
     
     // Helper method to update the game board based on a puzzle state
     private void updateBoard(PuzzleState state) {
-        Integer[][] boardConfiguration = state.getBoard();
+        int[][] boardConfiguration = state.getBoard();
         for (int i = 0; i < GRIDSIZE; i++) {
             for (int j = 0; j < GRIDSIZE; j++) {
                 int value = boardConfiguration[i][j];
