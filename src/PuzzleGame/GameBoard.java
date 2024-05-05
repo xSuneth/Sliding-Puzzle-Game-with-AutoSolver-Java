@@ -16,9 +16,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -28,6 +30,11 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+
+import model.algorithm.IterativeDeepeningAStar;
+import model.exceptions.PuzzleNumbersException;
+import model.heuristic.Manhatten;
+import model.state.State;
 
 
 /**
@@ -47,6 +54,8 @@ public class GameBoard extends javax.swing.JFrame {
     protected JFrame parentWindow;
     protected String playerName;
     protected PlayerManager playerManager = new PlayerManager();
+    private boolean isThreadRunning = false;
+    private Timer timer;
 
 
     protected Color pauseColor = new Color(255, 102, 0);
@@ -275,6 +284,10 @@ public class GameBoard extends javax.swing.JFrame {
 
     private void solitionbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_solitionbuttonActionPerformed
         // TODO add your handling code here:
+        isPaused = true;
+        solitionbutton.setBackground(Color.RED);
+        solitionbutton.setText("Analayzing");
+        
         solvePuzzle();
         //showWinningDialog();
     }//GEN-LAST:event_solitionbuttonActionPerformed
@@ -413,6 +426,7 @@ public class GameBoard extends javax.swing.JFrame {
     //initiate Buttons of the game board when starting the game
     public void initBoardButtons(){
         soundButton.setIcon(muteIcon);
+        pauseButton.setIcon(pauseIcon);
 
 
         //Adding clicking event to all the buttons
@@ -448,7 +462,13 @@ public class GameBoard extends javax.swing.JFrame {
         }
 
         //MARK: Shuffle
-        Collections.shuffle(boardButtons);
+
+        do{
+            Collections.shuffle(boardButtons);
+        }while(!isSolvable());
+
+
+
         for(BoardButton button : boardButtons){
             boardPanel.add(button);
         }
@@ -586,7 +606,12 @@ public class GameBoard extends javax.swing.JFrame {
         for(BoardButton button : boardButtons){
             boardPanel.remove(button);
         }
-        Collections.shuffle(boardButtons);
+
+        do{
+            Collections.shuffle(boardButtons);
+        }while(!isSolvable());
+
+
         if (executor != null) {
             executor.shutdownNow(); // Stop the current timer task
         }
@@ -634,67 +659,159 @@ public class GameBoard extends javax.swing.JFrame {
         return solutionArray;
     }
 
+
+    private Stack<State> path = new Stack<State>();
+
+
     //Puzzle Solver
     private void solvePuzzle() {
-        // Create an instance of PuzzleSolver
-        int emtyRow=0, emptyCol=0;
-        SlidingPuzzleSolver puzzleSolver  = new SlidingPuzzleSolver();
-    
-        // Create the initial puzzle state from the current board configuration
-        int[][] boardConfiguration = new int[GRIDSIZE][GRIDSIZE];
-        for (int i = 0; i < GRIDSIZE; i++) {
-            for (int j = 0; j < GRIDSIZE; j++) {
-                String buttonText = boardButtons.get(i * GRIDSIZE + j).getText();
-                boardConfiguration[i][j] = buttonText.equals("") ? 16 : Integer.parseInt(buttonText);
+        try{
+
+            
+
+            int[][] boardConfiguration = new int[GRIDSIZE][GRIDSIZE];
+            for (int i = 0; i < GRIDSIZE; i++) {
+                for (int j = 0; j < GRIDSIZE; j++) {
+                    String buttonText = boardButtons.get(i * GRIDSIZE + j).getText();
+                    boardConfiguration[i][j] = buttonText.equals("") ? 0 : Integer.parseInt(buttonText);
+                }
+            }
+
+            int[][] goal = {
+                {1, 2, 3, 4},
+                {8, 7, 6, 5},
+                {9, 10, 11, 12},
+                {0, 15, 14, 13} // Represented by 0
+            };
+            State initialState = new State(boardConfiguration, null);
+            State goalState = new State(goal, null);
+
+            State.setHeuristic(new Manhatten());
+            IterativeDeepeningAStar algorithm = new IterativeDeepeningAStar(initialState, goalState);
+
+                    ActionListener listener = new ActionListener() {
+                    @Override
+                    public void actionPerformed(java.awt.event.ActionEvent e) {
+                        //On first tick it will start solving
+                        if (!isThreadRunning) {
+                            path = algorithm.solve();
+                            isThreadRunning = true;
+                        }
+                        //When it solves it, update GUI
+                        if (!path.isEmpty()) {
+                            SwingUtilities.invokeLater(new Runnable() {
+                                
+                                @Override
+                                public void run() {
+                                    updateBoard(path.peek());
+                                    path.pop();
+
+
+                                    //When updating is finished, stop timer
+                                    if (path.isEmpty()) {
+                                        isThreadRunning = false;
+                                        timer.stop();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                };
+
+                timer = new Timer(1000, listener);
+                timer.start();
+
+              //  System.out.println(algorithm.getNumOfSteps() + " steps");
+               // System.out.println(algorithm.getNodeExplored() + " nodes explored");
+
+
+        } catch (NumberFormatException nfe) {
+            System.out.println(nfe.getMessage());
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+
+        solitionbutton.setText("Solution");
+        solitionbutton.setBackground(new Color(102, 51, 255));
+        
+    }
+
+    private int countInversions(int[] puzzle) {
+        int inversions = 0;
+        for (int i = 0; i < puzzle.length - 1; i++) {
+            for (int j = i + 1; j < puzzle.length; j++) {
+                if (puzzle[i] != 0 && puzzle[j] != 0 && puzzle[i] > puzzle[j]) {
+                    inversions++;
+                }
+            }
+        }
+        return inversions;
+    }
+
+    //check if the puzzle is solvable
+    public boolean isSolvable() {
+        int[] flatPuzzle = new int[16];
+        int x=0;
+        for(BoardButton button : boardButtons){
+            String value = button.getText();
+            if(value.equals("")){
+                flatPuzzle[x] = 0;
+            }else{
+                flatPuzzle[x] = Integer.parseInt(value);
+            }
+            x++;
+    }
+
+
+
+        int emptyRow = 0;
+        for (int i = 0; i < flatPuzzle.length; i++) {
+            if (flatPuzzle[i] == 0) {
+                emptyRow = i / 4 + 1;
+                break;
             }
         }
 
-        for(BoardButton button : boardButtons){
-            if(button.getText().equals("")){
-                int position = boardButtons.indexOf(button);
-                emtyRow = position/GRIDSIZE;
-                emptyCol = position%GRIDSIZE;
-                break;
-        }}
-
-
-
-        PuzzleState initialState = new PuzzleState(boardConfiguration,emtyRow,emptyCol, null);
-        System.out.println(boardConfiguration.toString());
-    
-        // Solve the puzzle
-        List<PuzzleState> solutionSteps = puzzleSolver.solvePuzzle(initialState);
-    
-        // Show the solution steps one by one with a 0.5-second interval
-        Timer timer = new Timer(500, new ActionListener() {
-            int currentIndex = 0;
-    
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (currentIndex < solutionSteps.size()) {
-                    PuzzleState nextState = solutionSteps.get(currentIndex);
-                    updateBoard(nextState);
-                    currentIndex++;
-                } else {
-                    ((Timer) e.getSource()).stop(); // Stop the timer when all steps are shown
-                }
-            }
-        });
-        timer.start();
+        int inversions = countInversions(flatPuzzle);
+        return (inversions + emptyRow) % 2 != 0;
     }
-    
-    // Helper method to update the game board based on a puzzle state
-    private void updateBoard(PuzzleState state) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private void updateBoard(State state) {
+        solitionbutton.setText("Solving");
+        solitionbutton.setBackground(Color.GREEN);
         int[][] boardConfiguration = state.getBoard();
-        for (int i = 0; i < GRIDSIZE; i++) {
-            for (int j = 0; j < GRIDSIZE; j++) {
+
+        if (boardConfiguration.length==0){
+            System.out.println("Empty");
+            return;
+        }
+
+        for (int i = 0; i < boardConfiguration.length; i++) {
+            for (int j = 0; j < boardConfiguration[0].length; j++) {
                 int value = boardConfiguration[i][j];
                 String buttonText = value == 0 ? "" : Integer.toString(value);
                 boardButtons.get(i * GRIDSIZE + j).setText(buttonText);
+                boardButtons.get(i * GRIDSIZE + j).setBackground((buttonText.equals("") ? Color.GREEN : new Color(20,25,46)));
             }
         }
-        setMoveVount(); // Update move count
-        isPuzzleSolved(); // Check if puzzle is solved
+        setMoveVount();
     }
 
 
