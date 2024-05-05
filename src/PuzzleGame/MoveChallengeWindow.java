@@ -21,7 +21,7 @@ public class MoveChallengeWindow extends GameBoard{
     }
     
     public void initStart(){
-        movesLabel.setText("Remaining Moves: 50");
+        movesLabel.setText("Remaining Moves: 250");
         currentMoves = 250;
         //  challangeFunctionPanel.setVisible(true);
         //  JLabel remainingMovesLabel = new JLabel();
